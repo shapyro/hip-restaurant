@@ -4,10 +4,16 @@
     <meta charset="utf-8">
     <title>Home Page</title>
 
+    <script
+      src="http://code.jquery.com/jquery-3.3.1.js"
+      integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+      crossorigin="anonymous">
+    </script>
+
     <!-- Latest compiled and minified CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" 
-  integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" 
-  crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" 
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" 
+      crossorigin="anonymous">
 
   </head>
 
@@ -21,9 +27,9 @@
               <br>
 
               <div class="text-center">
-                  <a href="/tables"><button class="btn btn-primary btn-lg"><span class="
+                  <a href="/reserve"><button class="btn btn-primary btn-lg"><span class="
                   glyphicon glyphicon-credit-card"></span>Make a Reservation</button></a>
-                  <a href="/tables"><button class="btn btn-primary btn-lg"><span class="
+                  <a href="/"><button class="btn btn-primary btn-lg"><span class="
                   glyphicon glyphicon-home"></span></button></a>
               </div>
           </div>
@@ -33,10 +39,10 @@
                 <h3 class="panel-title">Current Reservations</h3>
               </div>
               
-              <div class="panel-body">
-                  <form>
+              <div class="panel-body" id='tableSection'>
+                  <!-- <form>
                         <div class="well well-lg">...</div>
-                  </form>
+                  </form--> 
               </div>  
             </div>
 
@@ -45,16 +51,16 @@
                   <h3 class="panel-title">Waiting List</h3>
                 </div>
                 
-                <div class="panel-body">
-                    <form>
+                <div class="panel-body" id='waitlistSection'>
+                    <!-- <form>
                           <div class="well well-lg">...</div>
-                    </form>
+                    </form> -->
                 </div>  
               </div>
 
           <footer class="footer">
             <div class="container">
-              <p><a href="/api/tables">API Table Link</a> | <a href="/api/waitlist">API Wait List</a> | <a
+              <p><a id='clear'>Clear Tables</a> | <a href="/api/tables">API Table Link</a> | <a href="/api/waitlist">API Wait List</a> | <a
               href="https://github.com/shapyro/hip-restaurant">GitHub Repo</a></p>
             </div>
           </footer>
@@ -62,4 +68,82 @@
         </div>
 
   </body>
+
+  <script type="text/javascript">
+
+    function runTableQuery() {
+      var currentURL = window.location.origin;
+
+      $.ajax({url: currentURL + "/api/tables", method: "GET"})
+      .done(function(tableData){
+        console.log('__________________________________');
+        console.log('URL: ' + currentURL + '/api/tables');
+        console.log('__________________________________');
+        console.log(tableData);
+        console.log('__________________________________');
+
+        for (var i=0; i<tableData.length; i++) {
+          console.log(tableData[i]);
+
+          var tableSection = $('<div>');
+          tableSection.addClass('well');
+          tableSection.attr('id', 'waitlistWell-' + i+1);
+          $('#tableSection').append(tableSection);
+
+          var tableNumber = i + 1;
+
+          $('#waitlistWell-' + i+1).append(
+            `<h2><span class='label label-primary'>
+              ${tableNumber} </span>  | ${tableData[i].userName} 
+            </h2>`
+          );
+        }
+      });
+    }
+
+    function runWaitlistQuery() {
+      var currentURL = window.location.origin;
+
+      $.ajax({url: currentURL + "/api/waitlist", method: "GET"})
+      .done(function(waitlistData){
+        console.log('__________________________________');
+        console.log('URL: ' + currentURL + '/api/waitlist');
+        console.log('__________________________________');
+        console.log(waitlistData);
+        console.log('__________________________________');
+
+        for (var i=0; i<waitlistData.length; i++) {
+          console.log(waitlistData[i]);
+
+          var waitlistSection = $('<div>');
+          waitlistSection.addClass('well');
+          waitlistSection.attr('id', 'tableWell-' + i+1);
+          $('#waitlistSection').append(waitlistSection);
+
+          var tableNumber = i + 1;
+
+          $('#tableWell-' + i+1).append(
+            `<h2><span class='label label-primary'>
+              ${tableNumber} </span>  | ${waitlistData[i].userName} 
+            </h2>`
+          );
+        }
+      });
+    }
+
+    function clearTables() {
+      var currentURL = window.location.origin;
+      $.ajax({url: currentURL + '/api/clear', method: 'POST'});
+    }
+
+    $('#clear').on('click', function(){
+      alert("Clearing...");
+      clearTables();
+      location.reload();
+    })
+
+    runTableQuery();
+    runWaitlistQuery();
+  
+  </script>
 </html>
